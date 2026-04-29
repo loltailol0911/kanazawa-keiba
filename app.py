@@ -6,11 +6,15 @@ import google.generativeai as genai
 # --- 1. 設定エリア（APIキーをここに貼り付け） ---
 API_KEY = "AIzaSyC2QURLKQk3krzFzqn2tCHPAO8A6DoM_4w"  # ←取得したAPIキーに書き換えてください
 
+# 安全な接続設定
 genai.configure(api_key=API_KEY)
 
-# モデル名の404エラーを回避するため、正式なパス 'models/gemini-1.5-pro' を指定
-# もしこれでもダメな場合は 'models/gemini-1.5-flash' を試してください
-model = genai.GenerativeModel('models/gemini-1.5-pro')
+# 修正ポイント: 'models/' を外し、かつ最新の安定版名称に固定
+# Google AI StudioのAPIキーで最も通りやすい表記です
+try:
+    model = genai.GenerativeModel('gemini-1.5-pro-latest')
+except:
+    model = genai.GenerativeModel('gemini-1.5-pro')
 
 # --- 2. UI構築（Xiaomi POCO 視認性・スマホ操作性重視） ---
 st.set_page_config(
