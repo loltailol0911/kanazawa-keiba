@@ -7,7 +7,7 @@ from google.genai import types
 # --- 1. 設定エリア（Secretsから読み込み） ---
 try:
     # Streamlit Cloudの「Settings > Secrets」に設定したキーを読み込む
-    API_KEY = st.secrets["GEMINI_API_KEY"]
+    API_KEY = st.secrets["AIzaSyDuEemiGKUS8owTApI4vHdXYzmuQw_BBMU"]
 except Exception:
     st.error("エラー: Secretsに 'GEMINI_API_KEY' が設定されていません。")
     st.info("Streamlit Cloudの管理画面 > Settings > Secrets に GEMINI_API_KEY = 'あなたのキー' を登録してください。")
