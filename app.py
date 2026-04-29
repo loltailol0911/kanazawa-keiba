@@ -5,7 +5,7 @@ import google.generativeai as genai
 
 # --- 設定エリア ---
 genai.configure(api_key="AIzaSyC2QURLKQk3krzFzqn2tCHPAO8A6DoM_4w")
-model = genai.GenerativeModel('gemini-1.5-flash') # 高速・低コスト版
+model = model = genai.GenerativeModel('gemini-1.5-flash-latest') # 高速・低コスト版
 
 # --- UI構築（Xiaomi POCO 視認性重視） ---
 st.set_page_config(page_title="S-Analyzer v2.2", layout="centered")
