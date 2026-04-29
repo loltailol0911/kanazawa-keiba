@@ -3,47 +3,79 @@ import requests
 from bs4 import BeautifulSoup
 import google.generativeai as genai
 
-# --- 設定エリア ---
-genai.configure(api_key="AIzaSyC2QURLKQk3krzFzqn2tCHPAO8A6DoM_4w")
-model = model = genai.GenerativeModel('gemini-1.5-flash-latest') # 高速・低コスト版
+# --- 1. 設定エリア（APIキーをここに貼り付け） ---
+API_KEY = "AIzaSyC2QURLKQk3krzFzqn2tCHPAO8A6DoM_4w"  # ←取得したAPIキーに書き換えてください
 
-# --- UI構築（Xiaomi POCO 視認性重視） ---
-st.set_page_config(page_title="S-Analyzer v2.2", layout="centered")
+genai.configure(api_key=API_KEY)
+
+# モデル名の404エラーを回避するため、正式なパス 'models/gemini-1.5-pro' を指定
+# もしこれでもダメな場合は 'models/gemini-1.5-flash' を試してください
+model = genai.GenerativeModel('models/gemini-1.5-pro')
+
+# --- 2. UI構築（Xiaomi POCO 視認性・スマホ操作性重視） ---
+st.set_page_config(
+    page_title="S-Analyzer v2.2",
+    page_icon="🏇",
+    layout="centered"
+)
+
 st.title("🏇 金沢競馬投資解析 v2.2")
 st.caption("URLを貼るだけでプロトコルに基づいた買い目を算出します")
 
-# URL入力
-target_url = st.text_input("レースURL（nankanske.or.jp等）を入力")
+# 入力欄
+target_url = st.text_input("レースURL（nankanske.or.jp等）を入力", placeholder="https://...")
 
-if st.button("解析実行"):
+# --- 3. メインロジック ---
+if st.button("解析実行", type="primary"):
     if not target_url:
-        st.error("URLを入力してください")
+        st.error("URLを入力してください。")
+    elif API_KEY == "YOUR_API_KEY_HERE":
+        st.error("APIキーが設定されていません。app.pyの10行目を確認してください。")
     else:
         with st.spinner("データを取得・解析中..."):
             try:
-                # 1. スクレイピング実行
-                res = requests.get(target_url)
+                # A. スクレイピング（出走表の取得）
+                headers = {"User-Agent": "Mozilla/5.0"}
+                res = requests.get(target_url, headers=headers, timeout=10)
                 res.encoding = res.apparent_encoding
+                
+                if res.status_code != 200:
+                    st.error(f"サイトにアクセスできませんでした (Status: {res.status_code})")
+                    st.stop()
+
                 soup = BeautifulSoup(res.text, 'html.parser')
                 
-                # 不要なタグを削ぎ落としてテキスト化
-                for script in soup(["script", "style"]):
+                # 不要なタグを削除してテキストを軽量化
+                for script in soup(["script", "style", "nav", "footer"]):
                     script.decompose()
-                race_text = soup.get_text()
+                race_text = soup.get_text(separator="\n", strip=True)
 
-                # 2. プロトコルをシステムプロンプトとして注入
+                # B. プロトコル（指示書）の定義
                 instruction = """
                 あなたはS-Analyzer v2.2として、提供された競馬データから
                 【金沢競馬 EV最大化・投資プロトコル v2.2】を厳守して投資パケットを出力せよ。
-                1点100円、総額1,500円〜3,600円、比率6:3:1を絶対守ること。
+                
+                【厳守ルール】
+                1. 1点100円固定
+                2. 1レース総額1,500円〜3,600円
+                3. 比率：コア(60%)、攻め(30%)、ボーナス(10%)
+                4. 結論ファーストで出力すること
                 """
                 
-                # 3. Geminiに投げる
+                # C. Geminiに解析を依頼
                 response = model.generate_content([instruction, race_text])
                 
-                # 4. 結果表示
+                # D. 結果表示
                 st.success("解析完了")
+                st.markdown("---")
                 st.markdown(response.text)
                 
             except Exception as e:
-                st.error(f"エラーが発生しました: {e}")
+                # 詳細なエラー情報を表示してデバッグしやすくする
+                st.error(f"エラーが発生しました: {str(e)}")
+                if "404" in str(e):
+                    st.info("モデル名が見つからないようです。APIキーの権限、またはモデル名の記述を再確認してください。")
+
+# フッター
+st.markdown("---")
+st.caption("S-Analyzer v2.2 | Optimized for Xiaomi POCO")
