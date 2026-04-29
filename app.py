@@ -39,15 +39,13 @@ if st.button("解析実行", type="primary"):
                 race_text = soup.get_text(separator="\n", strip=True)[:15000]
 
                 # B. 解析実行
-                # 重要：最新SDKでは 'models/' を含めずモデル名のみを記述する
                 response = client.models.generate_content(
-                    model="gemini-1.5-flash", 
+                    model="gemini-2.0-flash",  # ✅ ここを修正
                     contents=[
                         "金沢競馬投資プロトコル v2.2に従い、結論ファーストで買い目を提案せよ。1点100円、総額1500-3600円、比率6:3:1を厳守。",
                         race_text
                     ]
                 )
-
                 if response:
                     st.success("解析完了")
                     st.markdown("---")
