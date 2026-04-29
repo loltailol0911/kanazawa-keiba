@@ -12,7 +12,7 @@ genai.configure(api_key=API_KEY)
 # 修正ポイント: 'models/' を外し、かつ最新の安定版名称に固定
 # Google AI StudioのAPIキーで最も通りやすい表記です
 try:
-    model = genai.GenerativeModel('gemini-1.5-pro-latest')
+    model = model = genai.GenerativeModel('gemini-pro')
 except:
     model = genai.GenerativeModel('gemini-1.5-pro')
 
